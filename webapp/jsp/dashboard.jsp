@@ -33,6 +33,7 @@
     <h3>Authentication & Session Active</h3>
     <p>Session ID: <code><%= session.getId() %></code></p>
     <p>Username: <code><%= currentUser != null ? currentUser.getUsername() : "N/A" %></code></p>
+    <p><a href="<%= request.getContextPath() %>/crops">Open crop management</a></p>
     <p>Full dashboard metrics and charts will be connected in Phase 6.</p>
 </div>
 </body>
