@@ -1,0 +1,26 @@
+# Compiled class files & build artifacts
+out/
+bin/
+target/
+*.class
+
+# Sensitive configuration & local credentials
+src/db.properties
+out/db.properties
+db.properties
+
+# IDE & Editor metadata
+.idea/
+*.iml
+.vscode/
+.vscode-shared/
+.settings/
+.project
+.classpath
+
+# Temporary files & build caches
+sources.txt
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

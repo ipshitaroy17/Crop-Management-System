@@ -1,0 +1,106 @@
+package com.greenfields.servlet;
+
+import com.greenfields.dao.UserDAO;
+import com.greenfields.dao.impl.UserDAOImpl;
+import com.greenfields.model.User;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+/**
+ * LoginServlet - Handles user authentication and session creation.
+ *
+ * ARCHITECTURE:
+ *   JSP (login.jsp) -> LoginServlet (Controller) -> UserDAO -> MySQL (users table)
+ *
+ * RESPONSIBILITIES:
+ *   - GET  : Renders the login form (or redirects to /dashboard if already logged in)
+ *   - POST : Validates credentials via UserDAO, establishes an HttpSession on success,
+ *            or returns an error message on failure.
+ */
+@WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
+public class LoginServlet extends HttpServlet {
+
+    private final UserDAO userDAO;
+
+    public LoginServlet() {
+        this.userDAO = new UserDAOImpl();
+    }
+
+    // Constructor injection for testing
+    public LoginServlet(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // If user already has an active session, forward directly to dashboard
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") instanceof User) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+
+        // Check if an error code was passed via query parameter (e.g. from AuthFilter)
+        String errorCode = request.getParameter("error");
+        if ("auth_required".equalsIgnoreCase(errorCode)) {
+            request.setAttribute("errorMessage", "Please log in to access this page.");
+        }
+
+        String msg = request.getParameter("msg");
+        if ("logged_out".equalsIgnoreCase(msg)) {
+            request.setAttribute("infoMessage", "You have been successfully logged out.");
+        }
+
+        request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        if (username != null) username = username.trim();
+        if (password != null) password = password.trim();
+
+        // Validate non-empty input
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            request.setAttribute("errorMessage", "Username and password cannot be empty.");
+            request.setAttribute("username", username);
+            request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            // Authenticate against database via UserDAO
+            User user = userDAO.findByUsername(username);
+
+            if (user != null && password.equals(user.getPassword())) {
+                // Authentication SUCCESSFUL:
+                // Create a fresh HttpSession and store the User object
+                HttpSession session = request.getSession(true);
+                session.setAttribute("user", user);
+
+                // Redirect to dashboard (PRG pattern: Post-Redirect-Get)
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            } else {
+                // Authentication FAILED:
+                request.setAttribute("errorMessage", "Invalid username or password.");
+                request.setAttribute("username", username);
+                request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Database authentication error: " + e.getMessage());
+            request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
+        }
+    }
+}
