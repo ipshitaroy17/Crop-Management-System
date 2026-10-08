@@ -200,8 +200,12 @@ Copy-Item src\db.properties out\ -Force
    java -cp "out;lib\*" com.greenfields.test.TestCropServlet
    java -cp "out;lib\*" com.greenfields.test.TestDashboardServlet
    ```
+6. **Harvest & Yield Management (servlet + H2 persistence):**
+   ```powershell
+   java -cp "out;lib\*" com.greenfields.test.TestHarvestServlet
+   ```
 
-The fertilizer and irrigation servlet suites use in-memory test DAOs for request/authorization behavior and H2 in MySQL compatibility mode for JDBC persistence and foreign-key checks. The DAO suite also falls back to H2 when local MySQL is unavailable. A successful H2 run does not establish live MySQL or Tomcat/JSP deployment behavior; those require the configured MySQL service and a Tomcat 10.1+ deployment.
+The fertilizer, irrigation, and harvest servlet suites use in-memory test DAOs for request/authorization behavior and H2 in MySQL compatibility mode for JDBC persistence and foreign-key checks. The harvest suite also verifies expected-versus-actual calculations, pending NULL yield, zero expected yield, and safe handling of a database foreign-key failure. Harvest achievement delegates to `HarvestRecord.getYieldAchievementPercent()` when actual yield is present and expected yield is non-zero; otherwise the UI shows Pending or an undefined percentage. Only admins can add, edit, or delete, and all harvest inputs and crop-season links are server-validated. The DAO suite falls back to H2 when local MySQL is unavailable. A successful H2 run does not establish live MySQL or Tomcat/JSP deployment behavior; those require the configured MySQL service and a Tomcat 10.1+ deployment.
 
 ---
 
@@ -215,4 +219,5 @@ The fertilizer and irrigation servlet suites use in-memory test DAOs for request
 - **Phase 6: Dashboard Controller & Metrics Integration** — ✅ COMPLETE
 - **Phase 7: Fertilizer Management** — ✅ COMPLETE
 - **Phase 8: Irrigation Management** — ✅ COMPLETE
-- **Phase 9: Season Management Module** — ⏳ NEXT
+- **Phase 9: Harvest & Yield Management** — ✅ COMPLETE
+- **Phase 10: Season Management Module** — ⏳ NEXT

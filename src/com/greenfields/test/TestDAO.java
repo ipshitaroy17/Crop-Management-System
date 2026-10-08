@@ -427,6 +427,13 @@ public class TestDAO {
             } else {
                 fail("update() verification failed.");
             }
+
+            dao.delete(hrId);
+            if (dao.findById(hrId) == null) {
+                pass("delete() -> removed test harvest record successfully.");
+            } else {
+                fail("delete() verification failed.");
+            }
         } catch (Exception e) {
             fail("HarvestRecordDAO threw exception: " + e.getMessage());
         }

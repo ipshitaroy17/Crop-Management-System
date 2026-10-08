@@ -53,6 +53,8 @@ public class HarvestRecordDAOImpl implements HarvestRecordDAO {
             + "actual_yield_kg=?, quality_grade=?, remarks=?, recorded_by=? "
             + "WHERE harvest_id=?";
 
+    private static final String SQL_DELETE = "DELETE FROM harvest_records WHERE harvest_id=?";
+
     // ─── Public DAO Methods ───────────────────────────────────────────────
 
     @Override
@@ -202,6 +204,17 @@ public class HarvestRecordDAOImpl implements HarvestRecordDAO {
         } catch (SQLException e) {
             throw new DatabaseException(
                     "Error updating harvest record id: " + record.getId(), e, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public void delete(int id) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error deleting harvest record id: " + id, e, e.getErrorCode());
         }
     }
 

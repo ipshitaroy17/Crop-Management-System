@@ -183,7 +183,7 @@
             <a class="action-link" href="<%= request.getContextPath() %>/crops"><strong>View crops</strong><span>Open crop catalog</span></a>
             <a class="action-link" href="<%= request.getContextPath() %>/fertilizers"><strong>Fertilizer management</strong><span>Review farm inputs</span></a>
             <a class="action-link" href="<%= request.getContextPath() %>/irrigation"><strong>Irrigation</strong><span>Manage watering schedules</span></a>
-            <span class="action-link action-disabled" aria-disabled="true"><strong>Harvest &amp; yield</strong><span>Coming soon</span></span>
+            <a class="action-link" href="<%= request.getContextPath() %>/harvest"><strong>Harvest &amp; yield</strong><span>Track seasonal production</span></a>
             <span class="action-link action-disabled" aria-disabled="true"><strong>Reports</strong><span>Coming soon</span></span>
         </div>
     </section>

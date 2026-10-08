@@ -50,4 +50,7 @@ public interface HarvestRecordDAO {
      * Uses record.getId() to identify which row to update.
      */
     void update(HarvestRecord record);
+
+    /** Deletes a harvest record by its primary key. */
+    void delete(int id);
 }

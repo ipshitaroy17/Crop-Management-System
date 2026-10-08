@@ -259,6 +259,7 @@ public class TestDashboardServlet {
                 public HarvestRecord findById(int id) { return null; }
                 public int save(HarvestRecord record) { return 0; }
                 public void update(HarvestRecord record) { }
+                public void delete(int id) { }
             };
         }
     }

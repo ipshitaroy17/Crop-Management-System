@@ -1,7 +1,7 @@
 # Project Status: Greenfields Agri Farm Crop Monitoring System
 
-**Current Milestone:** Checkpoint 5 (Phases 1–8 Completed)
-**Last Updated:** Phase 8 Irrigation Management Verification Complete
+**Current Milestone:** Checkpoint 6 (Phases 1–9 Completed)
+**Last Updated:** Phase 9 Harvest & Yield Management Verification Complete
 
 ---
 
@@ -15,8 +15,8 @@
 - [x] **Phase 6 — Dashboard Controller & Metrics Integration** — `COMPLETE`
 - [x] **Phase 7 — Fertilizer Management Module** — `COMPLETE`
 - [x] **Phase 8 — Irrigation Management Module** — `COMPLETE`
-- [ ] **Phase 9 — Season Management Module**
-- [ ] **Phase 10 — Harvest & Yield Analysis Module**
+- [x] **Phase 9 — Harvest & Yield Management Module** — `COMPLETE`
+- [ ] **Phase 10 — Season Management Module**
 - [ ] **Phase 11 — Seasonal Production Reports**
 - [ ] **Phase 12 — Greenfields Theme Styling & Faculty Presentation**
 
@@ -31,6 +31,14 @@
 - Irrigation listing, crop/season filters, add, edit, and POST delete use the existing irrigation, crop, and season DAOs.
 - AuthFilter protects `/irrigation`; authenticated users may view and only admins may change schedules.
 - Automated validation, authorization, safe database-error handling, and JDBC persistence checks pass using H2 in MySQL mode. Live MySQL and Tomcat/JSP browser verification were not available in this environment.
+
+### Phase 9 Verification
+
+- Harvest listing, crop/season filters, add, edit, POST delete, nullable actual yield, and achievement/status display use the existing `harvest_records` table and DAO.
+- AuthFilter protects `/harvest`; only admins can modify records. Server-side checks cover crop-season relationships, dates, non-negative decimal yields, grades, and field sizes.
+- Achievement uses `HarvestRecord.getYieldAchievementPercent()` when actual yield exists and expected yield is non-zero; pending and zero-expected cases are explicitly handled.
+- `HarvestRecordDAO` gained the missing delete operation required by admin CRUD; the schema remains unchanged.
+- Phase 9 automated checks: 35 passed. Phase 3–8 regressions also passed (DAO 33, auth 16, crop 11, dashboard 17, fertilizer 22, irrigation 27). Persistence and foreign-key error handling ran on H2 in MySQL mode. Live MySQL and Tomcat/JSP browser verification were unavailable.
 
 ---
 
