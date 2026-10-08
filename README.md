@@ -196,4 +196,5 @@ Copy-Item src\db.properties out\ -Force
 - **Phase 2: Java Model Classes & OOP** — ✅ COMPLETE
 - **Phase 3: JDBC DAO Layer** — ✅ COMPLETE
 - **Phase 4: Authentication & Session Management** — ✅ COMPLETE
-- **Phase 5: Crop Management CRUD** — ⏳ UPCOMING NEXT
+- **Phase 5: Crop Management CRUD** — ✅ COMPLETE
+- **Phase 6: Dashboard Controller & Metrics Integration** — ✅ COMPLETE

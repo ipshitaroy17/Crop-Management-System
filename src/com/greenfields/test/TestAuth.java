@@ -131,6 +131,11 @@ public class TestAuth {
                 } else {
                     fail("Session user username mismatch: " + user.getUsername());
                 }
+                if (user.getPassword() == null) {
+                    pass("Authenticated session principal does not retain the password.");
+                } else {
+                    fail("Password was retained in the authenticated session principal.");
+                }
             } else {
                 fail("HttpSession was not created or user attribute missing.");
             }
@@ -188,6 +193,11 @@ public class TestAuth {
                 User user = (User) ctx.sessionAttributes.get("user");
                 if (user != null && "viewer".equals(user.getRole()) && "Ravi Kumar".equals(user.getFullName())) {
                     pass("Session created for staff user Ravi Kumar with role 'viewer'.");
+                    if (user.getPassword() == null) {
+                        pass("Viewer session principal does not retain the password.");
+                    } else {
+                        fail("Viewer password was retained in the session principal.");
+                    }
                 } else {
                     fail("User details incorrect in session.");
                 }

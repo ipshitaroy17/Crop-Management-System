@@ -1,7 +1,7 @@
 # Project Status: Greenfields Agri Farm Crop Monitoring System
 
-**Current Milestone:** Checkpoint 2 (Phases 1–5 Completed)
-**Last Updated:** Phase 5 Crop Management Verification Complete
+**Current Milestone:** Checkpoint 3 (Phases 1–6 Completed)
+**Last Updated:** Phase 6 Dashboard Verification Complete
 
 ---
 
@@ -12,7 +12,7 @@
 - [x] **Phase 3 — JDBC DAO Layer & Data Persistence** — `COMPLETE`
 - [x] **Phase 4 — Authentication, Session Management & Servlets** — `COMPLETE`
 - [x] **Phase 5 — Crop Management CRUD Module** — `COMPLETE`
-- [ ] **Phase 6 — Dashboard Controller & Metrics Integration**
+- [x] **Phase 6 — Dashboard Controller & Metrics Integration** — `COMPLETE`
 - [ ] **Phase 7 — Season Management Module**
 - [ ] **Phase 8 — Fertilizer Application Module**
 - [ ] **Phase 9 — Irrigation Schedule Module**

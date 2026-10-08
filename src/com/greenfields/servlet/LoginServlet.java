@@ -85,10 +85,11 @@ public class LoginServlet extends HttpServlet {
             User user = userDAO.findByUsername(username);
 
             if (user != null && password.equals(user.getPassword())) {
-                // Authentication SUCCESSFUL:
-                // Create a fresh HttpSession and store the User object
+                // Keep credentials out of the long-lived session principal.
+                User sessionUser = new User(user.getId(), user.getUsername(), null,
+                        user.getFullName(), user.getRole(), user.getCreatedAt());
                 HttpSession session = request.getSession(true);
-                session.setAttribute("user", user);
+                session.setAttribute("user", sessionUser);
 
                 // Redirect to dashboard (PRG pattern: Post-Redirect-Get)
                 response.sendRedirect(request.getContextPath() + "/dashboard");
