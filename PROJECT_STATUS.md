@@ -1,7 +1,7 @@
 # Project Status: Greenfields Agri Farm Crop Monitoring System
 
-**Current Milestone:** Checkpoint 6 (Phases 1–9 Completed)
-**Last Updated:** Phase 9 Harvest & Yield Management Verification Complete
+**Current Milestone:** Checkpoint 7 (Phases 1–10 Completed)
+**Last Updated:** Phase 10 Reports & Crop History Verification Complete
 
 ---
 
@@ -16,8 +16,8 @@
 - [x] **Phase 7 — Fertilizer Management Module** — `COMPLETE`
 - [x] **Phase 8 — Irrigation Management Module** — `COMPLETE`
 - [x] **Phase 9 — Harvest & Yield Management Module** — `COMPLETE`
-- [ ] **Phase 10 — Season Management Module**
-- [ ] **Phase 11 — Seasonal Production Reports**
+- [x] **Phase 10 — Reports & Crop History** — `COMPLETE`
+- [ ] **Phase 11 — Season Management Module** — NOT STARTED
 - [ ] **Phase 12 — Greenfields Theme Styling & Faculty Presentation**
 
 ### Phase 7 Verification
@@ -39,6 +39,15 @@
 - Achievement uses `HarvestRecord.getYieldAchievementPercent()` when actual yield exists and expected yield is non-zero; pending and zero-expected cases are explicitly handled.
 - `HarvestRecordDAO` gained the missing delete operation required by admin CRUD; the schema remains unchanged.
 - Phase 9 automated checks: 35 passed. Phase 3–8 regressions also passed (DAO 33, auth 16, crop 11, dashboard 17, fertilizer 22, irrigation 27). Persistence and foreign-key error handling ran on H2 in MySQL mode. Live MySQL and Tomcat/JSP browser verification were unavailable.
+
+### Phase 10 Verification
+
+- Added authenticated, read-only `/reports` and `/crop-history` routes using `FarmReportService` and the existing crop, season, fertilizer, irrigation, and harvest DAOs. No SQL was added to JSPs and no schema/table changes were made.
+- Reports support all-crop/all-season, crop, season, and combined filters. IDs and crop-season relationships are validated against current DAO records.
+- Seasonal yield, harvest detail, fertilizer totals, irrigation counts/details, and crop history are derived from stored records. Actual yield `NULL` remains Pending; expected yield zero has N/A achievement. Normal achievement delegates to `HarvestRecord.getYieldAchievementPercent()` and performance is labeled Below Expected, On Target, or Above Expected.
+- Both pages are read-only, protected by the existing `AuthFilter`, and provide safe empty/error states. The dashboard now links to Reports and Crop History. Browser print styling is provided without a PDF dependency.
+- Phase 10 H2 MySQL-mode suite: 27 checks passed, including filtering, DAO-backed records, yield edge cases, history across multiple seasons, AuthFilter allow/reject behavior, empty states, and HTTP read-only behavior. Regression suites all passed: Phase 3 DAO 33, Phase 4 Auth 16, Phase 5 Crop 11, Phase 6 Dashboard 17, Phase 7 Fertilizer 22, Phase 8 Irrigation 27, and Phase 9 Harvest 35.
+- Live MySQL and Tomcat/JSP/browser testing were unavailable; no live deployment claim is made. Phase 11 remains not started.
 
 ---
 

@@ -184,7 +184,8 @@
             <a class="action-link" href="<%= request.getContextPath() %>/fertilizers"><strong>Fertilizer management</strong><span>Review farm inputs</span></a>
             <a class="action-link" href="<%= request.getContextPath() %>/irrigation"><strong>Irrigation</strong><span>Manage watering schedules</span></a>
             <a class="action-link" href="<%= request.getContextPath() %>/harvest"><strong>Harvest &amp; yield</strong><span>Track seasonal production</span></a>
-            <span class="action-link action-disabled" aria-disabled="true"><strong>Reports</strong><span>Coming soon</span></span>
+            <a class="action-link" href="<%= request.getContextPath() %>/reports"><strong>Reports</strong><span>Seasonal production and inputs</span></a>
+            <a class="action-link" href="<%= request.getContextPath() %>/crop-history"><strong>Crop history</strong><span>Records across seasons</span></a>
         </div>
     </section>
 </main>

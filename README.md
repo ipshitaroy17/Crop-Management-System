@@ -25,7 +25,7 @@ The **GreenFields Agri Farm Crop Monitoring System** provides a centralized, web
 - **Fertilizer Application Logging:** Tracking of chemical, organic, and bio-fertilizer dosages by stage and applicator.
 - **Irrigation Scheduling:** Multi-method watering schedules (Drip, Sprinkler, Flood, Manual) with overdue detection.
 - **Harvest & Yield Analysis:** Direct side-by-side comparison of `expected_yield_kg` vs. `actual_yield_kg` with achievement percentage calculations.
-- **Historical Production Reporting:** Cross-season aggregations and performance auditing.
+- **Reports & Crop History:** Filtered seasonal production, crop performance, fertilizer usage, irrigation records, and read-only crop histories across seasons.
 
 ---
 
@@ -125,16 +125,17 @@ greenfields/
 │           ├── exception/              ← Custom exceptions (DatabaseException)
 │           ├── filter/                 ← Security filters (AuthFilter)
 │           ├── interfaces/             ← Business interfaces (Reportable, Schedulable)
-│           ├── model/                  ← Domain models (BaseEntity, Crop, User, etc.)
+│           ├── model/                  ← Domain and report view models
 │           ├── dao/                    ← DAO interfaces
 │           │   └── impl/               ← JDBC DAO implementations
-│           ├── servlet/                ← Controllers (LoginServlet, DashboardServlet, etc.)
-│           ├── test/                   ← Verification suites (DAO, auth, dashboard, CRUD modules)
+│           ├── service/                ← DAO-backed report aggregation
+│           ├── servlet/                ← Controllers (login, dashboard, CRUD, reports, history)
+│           ├── test/                   ← Verification suites (DAO, auth, dashboard, modules)
 │           └── util/                   ← Database utilities (DBConnection)
 ├── webapp/
 │   ├── WEB-INF/
 │   │   └── web.xml                     ← Deployment descriptor
-│   └── jsp/                            ← View templates (login.jsp, dashboard.jsp)
+│   └── jsp/                            ← Login, dashboard, CRUD, reports, and history views
 ├── .gitignore                          ← Git exclusion rules
 ├── PROJECT_STATUS.md                   ← Development phases and progress tracker
 └── README.md                           ← Project documentation
@@ -204,8 +205,16 @@ Copy-Item src\db.properties out\ -Force
    ```powershell
    java -cp "out;lib\*" com.greenfields.test.TestHarvestServlet
    ```
+7. **Reports & Crop History (existing JDBC DAOs + H2 MySQL mode):**
+   ```powershell
+   java -cp "out;lib\*" com.greenfields.test.TestReportsServlet
+   ```
 
-The fertilizer, irrigation, and harvest servlet suites use in-memory test DAOs for request/authorization behavior and H2 in MySQL compatibility mode for JDBC persistence and foreign-key checks. The harvest suite also verifies expected-versus-actual calculations, pending NULL yield, zero expected yield, and safe handling of a database foreign-key failure. Harvest achievement delegates to `HarvestRecord.getYieldAchievementPercent()` when actual yield is present and expected yield is non-zero; otherwise the UI shows Pending or an undefined percentage. Only admins can add, edit, or delete, and all harvest inputs and crop-season links are server-validated. The DAO suite falls back to H2 when local MySQL is unavailable. A successful H2 run does not establish live MySQL or Tomcat/JSP deployment behavior; those require the configured MySQL service and a Tomcat 10.1+ deployment.
+Phase 10 reports are read-only and use existing DAOs/tables; filter IDs and crop-season relationships are checked server-side. Yield achievement uses `HarvestRecord.getYieldAchievementPercent()` only where actual yield exists and expected yield is non-zero. A NULL actual yield is Pending, while zero expected yield displays N/A. Fertilizer quantity is summed in the existing kilogram unit; irrigation is summarized by schedule count and recorded details. Crop History combines crop and season information with fertilizer, irrigation, and harvest records.
+
+Fertilizer, irrigation, harvest, and reports suites use H2 in MySQL compatibility mode for database integration; request tests use test data. The harvest suite verifies pending NULL yield, zero expected yield, and safe handling of foreign-key errors. Only admins can mutate crop/input/harvest records; Reports and Crop History are read-only. The DAO suite falls back to H2 when local MySQL is unavailable. A successful H2 run does not establish live MySQL or Tomcat/JSP browser behavior; those require the configured MySQL service and a Tomcat 10.1+ deployment.
+
+Phase 10 verification: 27 passed. Phase 3–9 regression totals: DAO 33, authentication 16, crop CRUD 11, dashboard 17, fertilizer 22, irrigation 27, and harvest/yield 35 passed. MySQL and Tomcat were unavailable for live database or browser deployment testing.
 
 ---
 
@@ -220,4 +229,6 @@ The fertilizer, irrigation, and harvest servlet suites use in-memory test DAOs f
 - **Phase 7: Fertilizer Management** — ✅ COMPLETE
 - **Phase 8: Irrigation Management** — ✅ COMPLETE
 - **Phase 9: Harvest & Yield Management** — ✅ COMPLETE
-- **Phase 10: Season Management Module** — ⏳ NEXT
+- **Phase 10: Reports & Crop History** — ✅ COMPLETE
+- **Phase 11: Season Management Module** — ⏳ NOT STARTED
+- **Phase 12: Greenfields Theme Styling & Faculty Presentation** — ⏳ NOT STARTED
