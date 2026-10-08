@@ -129,7 +129,7 @@ greenfields/
 │           ├── dao/                    ← DAO interfaces
 │           │   └── impl/               ← JDBC DAO implementations
 │           ├── servlet/                ← Controllers (LoginServlet, DashboardServlet, etc.)
-│           ├── test/                   ← Verification suites (TestDAO, TestAuth)
+│           ├── test/                   ← Verification suites (DAO, auth, dashboard, CRUD modules)
 │           └── util/                   ← Database utilities (DBConnection)
 ├── webapp/
 │   ├── WEB-INF/
@@ -187,6 +187,17 @@ Copy-Item src\db.properties out\ -Force
    ```powershell
    java -cp "out;lib\*" com.greenfields.test.TestAuth
    ```
+3. **Fertilizer Management (servlet + H2 persistence):**
+   ```powershell
+   java -cp "out;lib\*" com.greenfields.test.TestFertilizerServlet
+   ```
+4. **Crop CRUD and dashboard regression:**
+   ```powershell
+   java -cp "out;lib\*" com.greenfields.test.TestCropServlet
+   java -cp "out;lib\*" com.greenfields.test.TestDashboardServlet
+   ```
+
+The fertilizer servlet suite uses in-memory test DAOs for request/authorization behavior and H2 in MySQL compatibility mode for JDBC persistence and foreign-key checks. The DAO suite also falls back to H2 when local MySQL is unavailable. A successful H2 run does not establish live MySQL or Tomcat/JSP deployment behavior; those require the configured MySQL service and a Tomcat 10.1+ deployment.
 
 ---
 
@@ -198,3 +209,5 @@ Copy-Item src\db.properties out\ -Force
 - **Phase 4: Authentication & Session Management** — ✅ COMPLETE
 - **Phase 5: Crop Management CRUD** — ✅ COMPLETE
 - **Phase 6: Dashboard Controller & Metrics Integration** — ✅ COMPLETE
+- **Phase 7: Fertilizer Management** — ✅ COMPLETE
+- **Phase 8: Season Management Module** — ⏳ NEXT
