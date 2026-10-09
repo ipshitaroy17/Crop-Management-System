@@ -15,7 +15,6 @@
         input[type="text"], input[type="password"] { width: 100%; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 4px; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background-color: #2D6A4F; color: #FFFFFF; border: none; border-radius: 4px; font-size: 15px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #1E3A2B; }
-        .demo-credentials { margin-top: 20px; font-size: 12px; color: #64748B; background: #F1F5F9; padding: 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -43,11 +42,6 @@
         <button type="submit">Sign In</button>
     </form>
 
-    <div class="demo-credentials">
-        <strong>Demo Login:</strong><br>
-        Admin: <code>admin</code> / <code>admin123</code><br>
-        Staff: <code>ravi</code> / <code>ravi123</code>
-    </div>
 </div>
 </body>
 </html>
