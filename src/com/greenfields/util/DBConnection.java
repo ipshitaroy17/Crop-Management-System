@@ -7,13 +7,16 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * DBConnection - Utility class for obtaining MySQL JDBC connections.
  *
  * DESIGN:
- *   - Reads credentials from db.properties (on the classpath).
+ *   - Uses Railway MySQL environment variables when configured, otherwise reads
+ *     local credentials from db.properties on the classpath.
  *   - Provides a single static getConnection() method used by all DAO classes.
  *   - Properties are loaded once when the class is first used (static initializer).
  *   - Callers are responsible for closing the Connection (via try-with-resources).
@@ -24,9 +27,8 @@ import java.util.Properties;
  *   (e.g., Apache DBCP or HikariCP), but that is outside scope here.
  *
  * NOTE ON CLASS.FORNAME:
- *   MySQL Connector/J 8.x registers its driver automatically via Java's
- *   ServiceLoader mechanism, so Class.forName() is NOT required.
- *   It is mentioned in a comment below for faculty reference only.
+ *   Explicit loading ensures Connector/J registers with DriverManager from
+ *   this web application's class loader when running inside Tomcat.
  */
 public class DBConnection {
 
@@ -46,6 +48,17 @@ public class DBConnection {
 
     // ─── Load db.properties from classpath ───────────────────────────────
     private static void loadProperties() {
+        String host = System.getenv("MYSQLHOST");
+        String port = System.getenv("MYSQLPORT");
+        String username = System.getenv("MYSQLUSER");
+        String password = System.getenv("MYSQLPASSWORD");
+        String database = System.getenv("MYSQLDATABASE");
+
+        if (hasRailwayConfiguration(host, port, username, password, database)) {
+            configureFromEnvironment(host, port, username, password, database);
+            return;
+        }
+
         Properties props = new Properties();
 
         // getResourceAsStream looks for db.properties in the same location
@@ -77,10 +90,49 @@ public class DBConnection {
         }
     }
 
+    private static boolean hasRailwayConfiguration(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void configureFromEnvironment(String host, String port,
+                                                String username, String password,
+                                                String database) {
+        List<String> missing = new ArrayList<>();
+        if (host == null || host.isBlank()) missing.add("MYSQLHOST");
+        if (port == null || port.isBlank()) missing.add("MYSQLPORT");
+        if (username == null || username.isBlank()) missing.add("MYSQLUSER");
+        if (password == null || password.isEmpty()) missing.add("MYSQLPASSWORD");
+        if (database == null || database.isBlank()) missing.add("MYSQLDATABASE");
+        if (!missing.isEmpty()) {
+            throw new DatabaseException("Incomplete MySQL environment configuration; missing: "
+                    + String.join(", ", missing));
+        }
+
+        int portNumber;
+        try {
+            portNumber = Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            throw new DatabaseException("MYSQLPORT must be a valid TCP port.", e);
+        }
+        if (portNumber < 1 || portNumber > 65535) {
+            throw new DatabaseException("MYSQLPORT must be between 1 and 65535.");
+        }
+
+        dbUrl = "jdbc:mysql://" + host + ":" + portNumber + "/" + database
+                + "?serverTimezone=UTC&sslMode=PREFERRED&allowPublicKeyRetrieval=true";
+        dbUsername = username;
+        dbPassword = password;
+    }
+
     // ─── Public API ───────────────────────────────────────────────────────
 
     /**
-     * Returns a new JDBC Connection to greenfields_db.
+     * Returns a new JDBC Connection to the configured MySQL database.
      *
      * USAGE (always use try-with-resources so the connection is auto-closed):
      *
@@ -92,16 +144,16 @@ public class DBConnection {
      * @throws DatabaseException if the connection cannot be established
      */
     public static Connection getConnection() {
-        // Note for faculty:
-        // Class.forName("com.mysql.cj.jdbc.Driver") is NOT required for
-        // MySQL Connector/J 8.x because the driver self-registers via ServiceLoader.
-        // We rely on DriverManager to pick it up automatically.
         try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
             return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+        } catch (ClassNotFoundException e) {
+            throw new DatabaseException(
+                    "MySQL Connector/J is not available on the application classpath.", e);
         } catch (SQLException e) {
             throw new DatabaseException(
                     "Cannot connect to database at: " + dbUrl
-                    + " — check that MySQL is running and db.properties is correct.",
+                    + " — check that MySQL is reachable and the database configuration is correct.",
                     e,
                     e.getErrorCode());
         }

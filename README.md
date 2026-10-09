@@ -145,28 +145,51 @@ greenfields/
 
 ## 8. MySQL Setup Instructions
 
-1. Start your local MySQL service (via MySQL Workbench, XAMPP, or Windows Services).
-2. Open terminal or MySQL client and run the database initialization script:
+The original `sql/greenfields_db.sql` is a destructive reset script: it begins with `DROP DATABASE IF EXISTS greenfields_db` and also drops all six tables. **Never run it against a database containing data.** It has not been made part of application startup or the Docker image. It also contains development/demo user seed records; those are intentionally absent from production initialization.
+
+For a new, empty Railway database, select the database named by `MYSQLDATABASE` and run `sql/greenfields_railway_init.sql`. It creates the six required tables only, with no `DROP`, `TRUNCATE`, or data-seed statements. If a table already exists, stop and inspect rather than dropping or replacing it. The application does not run schema migrations automatically.
+
+The application expects the six existing tables (`users`, `crops`, `seasons`, `fertilizer_applications`, `irrigation_schedules`, and `harvest_records`). The production schema contains no administrator account or credentials. After the application is deployed and its Railway MySQL variables are connected, create the first administrator using the hidden-prompt helper from an interactive Railway SSH session:
+
+```bash
+railway ssh -s <APP_SERVICE> -- java -cp '/usr/local/tomcat/webapps/greenfields/WEB-INF/classes:/usr/local/tomcat/webapps/greenfields/WEB-INF/lib/*' com.greenfields.tools.AdminAccountBootstrap
+```
+
+The helper refuses an existing username, uses prepared statements, requires a unique 16-100 character password entered without echo, and does not print the password or exception details. The current application schema and login code store/compare passwords as plaintext. Therefore this only protects the credential from source, shell history, and logs; it is **not secure at rest**. Do not use a password used anywhere else, and do not expose the app publicly with a real account until password hashing is implemented and existing credentials are migrated.
+
+To initialize a dedicated empty local database (destructive; only do this if you intend to reset it), run:
    ```bash
    mysql -u root -p < sql/greenfields_db.sql
    ```
-3. Verify that the `greenfields_db` database is created with all 6 tables populated with demo records for Paddy, Maize, and Tomato.
 
 ---
 
 ## 9. Configuring `db.properties`
 
-1. Copy `src/db.properties.example` to `src/db.properties`:
+For local development, copy `src/db.properties.example` to `src/db.properties`:
    ```bash
    cp src/db.properties.example src/db.properties
    ```
-2. Update the credentials with your local MySQL password:
+Then set your local MySQL connection values in that ignored file:
    ```properties
    db.url=jdbc:mysql://localhost:3306/greenfields_db?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
    db.username=root
    db.password=your_mysql_password
    ```
-   *(Note: `src/db.properties` is excluded by `.gitignore` so your personal password is never committed.)*
+   (`src/db.properties` is excluded by `.gitignore`.)
+
+In production, `DBConnection` uses Railway's `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, and `MYSQLDATABASE` variables when present. The local `db.properties` fallback is retained for development and is not copied into the Docker image. Never place credentials in Git, Docker build arguments, image layers, or logs.
+
+## 11. Railway Deployment (Docker)
+
+The repository-root `Dockerfile` compiles production Java sources with Java 21, packages the existing JSP webapp and MySQL Connector/J into `greenfields.war`, and runs it on Tomcat 10.1.60. The container adjusts Tomcat's HTTP connector to Railway's injected `PORT` (with 8080 as a local default). Railway's health check is `/greenfields/login`.
+
+1. Create a Railway project with a new application service connected to this GitHub repository and add a separate MySQL service. Initialize only a newly created empty database with `sql/greenfields_railway_init.sql`; do not import the reset SQL file into Railway.
+2. In the application service's Variables panel, add Railway variable references to the MySQL service for `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, and `MYSQLDATABASE`. Use Railway's reference picker so the password remains a secret variable. `PORT` is supplied by Railway; do not set a different fixed port.
+3. Deploy the application service from the repository root. Railway detects the root `Dockerfile`; the health check waits for `/greenfields/login` to return successfully.
+4. Deploy, initialize the first administrator through the interactive helper above, then open `https://<your-railway-domain>/greenfields/login` and test authentication and the data-backed modules. Because the current schema stores plaintext passwords, use a unique temporary password until password hashing is implemented.
+
+Local checks can be run with `docker build -t greenfields .` and `docker run --rm -p 8080:8080 -e PORT=8080 -e MYSQLHOST=... -e MYSQLPORT=... -e MYSQLUSER=... -e MYSQLPASSWORD=... -e MYSQLDATABASE=... greenfields`. Never paste a real password into shell history; use a local ignored env file or your shell's secure environment mechanism instead. Railway deployment and a live URL require a Railway account, service variables, and explicit deployment from the dashboard or authenticated CLI.
 
 ---
 

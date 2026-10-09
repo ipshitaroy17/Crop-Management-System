@@ -1,0 +1,16 @@
+.git
+.gitignore
+.idea
+.vscode
+bin
+out
+target
+*.class
+*.log
+sources.txt
+src/db.properties
+db.properties
+out/db.properties
+sql
+README.md
+PROJECT_STATUS.md

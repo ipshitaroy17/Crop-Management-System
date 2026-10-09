@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * LoginServlet - Handles user authentication and session creation.
@@ -25,6 +27,8 @@ import java.io.IOException;
  */
 @WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(LoginServlet.class.getName());
 
     private final UserDAO userDAO;
 
@@ -100,7 +104,8 @@ public class LoginServlet extends HttpServlet {
                 request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            request.setAttribute("errorMessage", "Database authentication error: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Login authentication failed while accessing the user store", e);
+            request.setAttribute("errorMessage", "Login is temporarily unavailable. Please try again later.");
             request.getRequestDispatcher("/jsp/login.jsp").forward(request, response);
         }
     }

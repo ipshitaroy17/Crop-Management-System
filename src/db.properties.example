@@ -1,5 +1,5 @@
 # Greenfields Agri Farm - Database Configuration Template
-# Copy this file to src/db.properties and configure your MySQL password.
+# Copy this file to src/db.properties and configure your local MySQL password.
 
 db.url=jdbc:mysql://localhost:3306/greenfields_db?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
 db.username=root
