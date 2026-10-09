@@ -37,6 +37,7 @@ public class DBConnection {
     private static String dbUrl;
     private static String dbUsername;
     private static String dbPassword;
+    private static String configurationError;
 
     // ─── Static initializer — runs once when class is loaded ─────────────
     static {
@@ -48,6 +49,11 @@ public class DBConnection {
 
     // ─── Load db.properties from classpath ───────────────────────────────
     private static void loadProperties() {
+        dbUrl = null;
+        dbUsername = null;
+        dbPassword = null;
+        configurationError = null;
+
         String host = System.getenv("MYSQLHOST");
         String port = System.getenv("MYSQLPORT");
         String username = System.getenv("MYSQLUSER");
@@ -55,7 +61,11 @@ public class DBConnection {
         String database = System.getenv("MYSQLDATABASE");
 
         if (hasEnvironmentConfiguration(host, port, username, password, database)) {
-            configureFromEnvironment(host, port, username, password, database);
+            try {
+                configureFromEnvironment(host, port, username, password, database);
+            } catch (DatabaseException e) {
+                configurationError = e.getMessage();
+            }
             return;
         }
 
@@ -68,9 +78,10 @@ public class DBConnection {
                 .getResourceAsStream(PROPERTIES_FILE)) {
 
             if (in == null) {
-                throw new DatabaseException(
-                        "Configuration file '" + PROPERTIES_FILE + "' not found in classpath. "
-                        + "Make sure db.properties is copied to the output/classes directory.");
+                configurationError = "Database configuration is missing. Set MYSQLHOST, MYSQLPORT, "
+                        + "MYSQLUSER, MYSQLPASSWORD, and MYSQLDATABASE, or provide local "
+                        + PROPERTIES_FILE + ".";
+                return;
             }
 
             props.load(in);
@@ -80,13 +91,14 @@ public class DBConnection {
             dbPassword = props.getProperty("db.password");
 
             if (dbUrl == null || dbUsername == null || dbPassword == null) {
-                throw new DatabaseException(
-                        "One or more required properties (db.url, db.username, db.password) "
-                        + "are missing in " + PROPERTIES_FILE);
+                configurationError = "Required database properties are missing in " + PROPERTIES_FILE + ".";
+                dbUrl = null;
+                dbUsername = null;
+                dbPassword = null;
             }
 
         } catch (IOException e) {
-            throw new DatabaseException("Failed to read " + PROPERTIES_FILE, e);
+            configurationError = "Unable to read local database configuration from " + PROPERTIES_FILE + ".";
         }
     }
 
@@ -144,6 +156,12 @@ public class DBConnection {
      * @throws DatabaseException if the connection cannot be established
      */
     public static Connection getConnection() {
+        if (configurationError != null) {
+            throw new DatabaseException(configurationError);
+        }
+        if (dbUrl == null || dbUsername == null || dbPassword == null) {
+            throw new DatabaseException("Database configuration is incomplete.");
+        }
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
@@ -166,6 +184,7 @@ public class DBConnection {
         dbUrl = url;
         dbUsername = username;
         dbPassword = password;
+        configurationError = null;
     }
 
     /**
