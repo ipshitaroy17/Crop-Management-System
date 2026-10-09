@@ -15,7 +15,7 @@ import java.util.Properties;
  * DBConnection - Utility class for obtaining MySQL JDBC connections.
  *
  * DESIGN:
- *   - Uses Railway MySQL environment variables when configured, otherwise reads
+ *   - Uses MYSQL* environment variables when configured, otherwise reads
  *     local credentials from db.properties on the classpath.
  *   - Provides a single static getConnection() method used by all DAO classes.
  *   - Properties are loaded once when the class is first used (static initializer).
@@ -54,7 +54,7 @@ public class DBConnection {
         String password = System.getenv("MYSQLPASSWORD");
         String database = System.getenv("MYSQLDATABASE");
 
-        if (hasRailwayConfiguration(host, port, username, password, database)) {
+        if (hasEnvironmentConfiguration(host, port, username, password, database)) {
             configureFromEnvironment(host, port, username, password, database);
             return;
         }
@@ -90,7 +90,7 @@ public class DBConnection {
         }
     }
 
-    private static boolean hasRailwayConfiguration(String... values) {
+    private static boolean hasEnvironmentConfiguration(String... values) {
         for (String value : values) {
             if (value != null && !value.isBlank()) {
                 return true;
@@ -124,7 +124,7 @@ public class DBConnection {
         }
 
         dbUrl = "jdbc:mysql://" + host + ":" + portNumber + "/" + database
-                + "?serverTimezone=UTC&sslMode=PREFERRED&allowPublicKeyRetrieval=true";
+                + "?serverTimezone=UTC&sslMode=VERIFY_IDENTITY";
         dbUsername = username;
         dbPassword = password;
     }

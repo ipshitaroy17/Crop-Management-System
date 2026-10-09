@@ -22,6 +22,9 @@ public class UserDAOImpl implements UserDAO {
             "SELECT user_id, username, password, full_name, role, created_at "
             + "FROM users WHERE user_id = ?";
 
+    private static final String SQL_UPDATE_PASSWORD =
+            "UPDATE users SET password = ? WHERE user_id = ?";
+
     // ─── Public DAO Methods ───────────────────────────────────────────────
 
     @Override
@@ -60,6 +63,18 @@ public class UserDAOImpl implements UserDAO {
                     "Error finding user by id: " + id, e, e.getErrorCode());
         }
         return null;
+    }
+
+    @Override
+    public void updatePassword(int id, String password) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_UPDATE_PASSWORD)) {
+            ps.setString(1, password);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error updating user password", e, e.getErrorCode());
+        }
     }
 
     // ─── Private helper: maps one ResultSet row → User object ────────────

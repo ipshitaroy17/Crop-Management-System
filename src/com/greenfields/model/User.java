@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
  *
  * FIELDS:
  *   username   → users.username   (VARCHAR 50, UNIQUE)
- *   password   → users.password   (VARCHAR 100)
+ *   password   → users.password   (VARCHAR 100, salted PBKDF2 hash)
  *   fullName   → users.full_name  (VARCHAR 100)
  *   role       → users.role       (ENUM: 'admin' or 'viewer')
  *   createdAt  → users.created_at (TIMESTAMP)
  *
- * NOTE: Password is stored as plain text in the demo (matches the SQL script).
- *       In a production system this would be a hashed value.
+ * Password values loaded from storage are salted PBKDF2 hashes. Legacy local
+ * plaintext values are upgraded after a successful login.
  *
  * MEANINGFUL METHOD:
  *   isAdmin() → convenience check used in Servlets for access control.
@@ -40,7 +40,7 @@ public class User extends BaseEntity {
      *
      * @param id        user_id from DB
      * @param username  login username
-     * @param password  password (plain text for demo)
+     * @param password  stored password hash
      * @param fullName  display name
      * @param role      "admin" or "viewer"
      * @param createdAt account creation timestamp

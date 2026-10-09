@@ -27,4 +27,7 @@ public interface UserDAO {
      * @return matching User object, or null
      */
     User findById(int id);
+
+    /** Replace a legacy password value with its hashed form after successful login. */
+    void updatePassword(int id, String password);
 }

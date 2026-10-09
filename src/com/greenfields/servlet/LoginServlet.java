@@ -3,6 +3,7 @@ package com.greenfields.servlet;
 import com.greenfields.dao.UserDAO;
 import com.greenfields.dao.impl.UserDAOImpl;
 import com.greenfields.model.User;
+import com.greenfields.util.PasswordHasher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -88,7 +89,10 @@ public class LoginServlet extends HttpServlet {
             // Authenticate against database via UserDAO
             User user = userDAO.findByUsername(username);
 
-            if (user != null && password.equals(user.getPassword())) {
+            if (user != null && PasswordHasher.matches(password, user.getPassword())) {
+                if (!PasswordHasher.isHashed(user.getPassword())) {
+                    userDAO.updatePassword(user.getId(), PasswordHasher.hash(password.toCharArray()));
+                }
                 // Keep credentials out of the long-lived session principal.
                 User sessionUser = new User(user.getId(), user.getUsername(), null,
                         user.getFullName(), user.getRole(), user.getCreatedAt());

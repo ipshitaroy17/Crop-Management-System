@@ -1,6 +1,7 @@
 package com.greenfields.tools;
 
 import com.greenfields.util.DBConnection;
+import com.greenfields.util.PasswordHasher;
 
 import java.io.Console;
 import java.sql.Connection;
@@ -53,7 +54,7 @@ public final class AdminAccountBootstrap {
                 return 2;
             }
 
-            createAccount(username, fullName, new String(firstPassword));
+            createAccount(username, fullName, PasswordHasher.hash(firstPassword));
             console.printf("Administrator account created.%n");
             return 0;
         } catch (SQLException e) {

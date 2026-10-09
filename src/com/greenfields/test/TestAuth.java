@@ -75,7 +75,7 @@ public class TestAuth {
         } catch (Exception ignored) {}
 
         if (!connected) {
-            String testUrl = "jdbc:h2:mem:greenfields_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE";
+            String testUrl = "jdbc:h2:mem:greenfields_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
             try {
                 Connection conn = DriverManager.getConnection(testUrl, "sa", "");
                 Statement stmt = conn.createStatement();
