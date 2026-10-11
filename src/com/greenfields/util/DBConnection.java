@@ -111,6 +111,20 @@ public class DBConnection {
         return false;
     }
 
+    private static String resolveSslMode() {
+        String mode = System.getenv("MYSQLSSLMODE");
+        if (mode == null || mode.isBlank()) {
+            return "VERIFY_IDENTITY";
+        }
+        mode = mode.trim().toUpperCase();
+        // Only allow secure modes — DISABLED and PREFERRED are never acceptable
+        if ("REQUIRED".equals(mode) || "VERIFY_CA".equals(mode) || "VERIFY_IDENTITY".equals(mode)) {
+            return mode;
+        }
+        throw new DatabaseException(
+                "MYSQLSSLMODE must be REQUIRED, VERIFY_CA, or VERIFY_IDENTITY; got: " + mode);
+    }
+
     private static void configureFromEnvironment(String host, String port,
                                                 String username, String password,
                                                 String database) {
@@ -135,8 +149,9 @@ public class DBConnection {
             throw new DatabaseException("MYSQLPORT must be between 1 and 65535.");
         }
 
+        String sslMode = resolveSslMode();
         dbUrl = "jdbc:mysql://" + host + ":" + portNumber + "/" + database
-                + "?serverTimezone=UTC&sslMode=VERIFY_IDENTITY";
+                + "?serverTimezone=UTC&sslMode=" + sslMode;
         dbUsername = username;
         dbPassword = password;
     }
