@@ -18,6 +18,8 @@ RUN mkdir -p /build/classes /build/stage/greenfields/WEB-INF/classes /build/stag
 FROM tomcat:10.1.60-jre21-temurin-noble
 
 ENV CATALINA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+RUN rm -rf /usr/local/tomcat/webapps/* /usr/local/tomcat/webapps.dist/* 2>/dev/null || true
+COPY --from=build /build/greenfields.war /usr/local/tomcat/webapps/ROOT.war
 COPY --from=build /build/greenfields.war /usr/local/tomcat/webapps/greenfields.war
 COPY docker/railway-entrypoint.sh /usr/local/bin/railway-entrypoint.sh
 RUN chmod 0755 /usr/local/bin/railway-entrypoint.sh
